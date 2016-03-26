@@ -251,12 +251,6 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
         NSLog(@"返回信息:%@", task.response);
         NSLog(@"成功:%@",responseObject);
         success(task, responseObject);
-        
-        if ([responseObject[@"errcode"] longValue] == 4011) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[FIAppDelegate shareAppDelegate] switchToLoginViewController];
-            });
-        }
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         NSLog(@"失败:%@", error);
         failure(task, error);
