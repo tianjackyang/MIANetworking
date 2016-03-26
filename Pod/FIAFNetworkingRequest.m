@@ -75,7 +75,7 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         shareAFNetworingInstance = [[FIAFNetworkingRequest alloc] init];
-        [shareAFNetworingInstance setDelegate:[[FIAFNetworingImpl alloc] init]];
+        //[shareAFNetworingInstance setDelegate:[[FIAFNetworingImpl alloc] init]]; //修改请求头和相应头调用代理初始化设置代理并实现FIAFNetworking协议
     });
     
     return shareAFNetworingInstance;
@@ -122,7 +122,14 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
        failure:(void (^)(id operation ,NSError *error))failure
 {
  
-    NSString *afUrl  = [FIURLManager strURLWithType:type];
+    NSString *afUrl  = nil;
+    if ([self.delegate respondsToSelector:@selector(strURLWithType:)]) {
+        afUrl = [self.delegate strURLWithType:type];
+    }
+    else {
+        afUrl = [FIURLManager strURLWithType:type];
+    }
+
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     
     if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
@@ -171,7 +178,14 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
 {
 
     // 获取url string 格式的地址；
-    NSString *afUrl  = [FIURLManager strURLWithType:type];
+    NSString *afUrl  = nil;
+    if ([self.delegate respondsToSelector:@selector(strURLWithType:)]) {
+        afUrl = [self.delegate strURLWithType:type];
+    }
+    else {
+        afUrl = [FIURLManager strURLWithType:type];
+    }
+
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
         [self.delegate ModifyHttpRequestHeader:sessionManager type:type];
@@ -225,7 +239,14 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
         failure:(void (^)(id operation, NSError *error))failure
 {
     // 获取url string 格式的地址；
-    NSString *afUrl  = [FIURLManager strURLWithType:type];
+    NSString *afUrl  = nil;
+    if ([self.delegate respondsToSelector:@selector(strURLWithType:)]) {
+        afUrl = [self.delegate strURLWithType:type];
+    }
+    else {
+        afUrl = [FIURLManager strURLWithType:type];
+    }
+    
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
         [self.delegate ModifyHttpRequestHeader:sessionManager type:type];
@@ -388,7 +409,14 @@ static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
                      success:(void (^)(id operation, id dic))success
                      failure:(void (^)(id operation, NSError *error))failure
 {
-    NSString *afUrl  = [FIURLManager strURLWithType:type];
+    NSString *afUrl  = nil;
+    if ([self.delegate respondsToSelector:@selector(strURLWithType:)]) {
+        afUrl = [self.delegate strURLWithType:type];
+    }
+    else {
+        afUrl = [FIURLManager strURLWithType:type];
+    }
+
     NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:afUrl parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         [formData appendPartWithFileURL:fileurl name:filetype fileName:filename mimeType:mimeType error:nil];
     } error:nil];

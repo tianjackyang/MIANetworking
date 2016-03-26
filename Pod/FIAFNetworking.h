@@ -17,4 +17,6 @@
 - (void)ModifyHttpReponseHeader:(AFHTTPSessionManager *)sessionManager type:(FIHttpRequestType)type;
 //修改请求头
 - (NSMutableURLRequest *)requestWithType:(FIHttpRequestType)type params:(NSDictionary *)params;
+//自定义url
+- (NSString *)strURLWithType:(FIHttpRequestType)type;
 @end

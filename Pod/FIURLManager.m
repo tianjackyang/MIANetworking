@@ -1,6 +1,5 @@
 //
 //  FIURLManager.m
-//  FICorpUMSApp
 //
 
 #import "FIURLManager.h"
@@ -23,7 +22,7 @@
             
         case FIHTTP_REQUEST_TYPE_ALLAPI_GET:  //返回所有的接口json数据
         {
-           NSString *aString = @"http://121.43.231.51:xxxx/edoctor/init-config";
+           NSString *aString = @"http://121.43.231.51:6868/edoctor/init-config";
            NSString *append = [NSString stringWithFormat:@"?appId=%@&appVersion=%@",@"appid",@"appversion"];
            urlString = [NSString stringWithFormat:@"%@%@",aString,append];
         }
