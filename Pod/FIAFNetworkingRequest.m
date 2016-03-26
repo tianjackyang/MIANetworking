@@ -60,7 +60,10 @@
 */
 
 #import "FIAFNetworkingRequest.h"
-#import "FIHttpRequestManager.h"
+#import "FIQueryStringPair.h"
+#import "FIAFNetworingImpl.h"
+
+static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
 
 @interface FIAFNetworkingRequest ()
 
@@ -69,31 +72,39 @@
 
 @implementation FIAFNetworkingRequest
 
-+ (void)ModifyHttpRequestHeader:(AFHTTPSessionManager *)sessionManager {
-    UIDevice *device = [[UIDevice alloc] init];
-    NSString *name = device.name;
-    NSString *stringName = [name stringByReplacingOccurrencesOfString:@"+" withString:@" "];
-    stringName = [stringName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    [sessionManager.requestSerializer setValue:[[UIDevice currentDevice] slm_uniqueDeviceIdentifier] forHTTPHeaderField:@"DEVICE_ID"];
-    [sessionManager.requestSerializer setValue:@"PHONE" forHTTPHeaderField:@"DEVICE_TYPE"];
-    [sessionManager.requestSerializer setValue:@"iOS" forHTTPHeaderField:@"OS"];
-    [sessionManager.requestSerializer setValue:[[UIDevice currentDevice] systemVersion] forHTTPHeaderField:@"OS_VERSION"];
-    [sessionManager.requestSerializer setValue:[[FIDataContext shareDataContext] appId] forHTTPHeaderField:@"APP_ID"];
-    [sessionManager.requestSerializer setValue:[[FIDataContext shareDataContext] accessToken] forHTTPHeaderField:@"ACCESSTOKEN"];
-    [sessionManager.requestSerializer setValue:FIAPPVersion forHTTPHeaderField:@"APP_VERSION"];
-    [sessionManager.requestSerializer setValue:stringName forHTTPHeaderField:@"DEVICE_NAME"];
++ (FIAFNetworkingRequest*)shareAFNetworking {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        shareAFNetworingInstance = [[FIAFNetworkingRequest alloc] init];
+        [shareAFNetworingInstance setDelegate:[[FIAFNetworingImpl alloc] init]];
+    });
     
-    NSLog(@"HTTP请求头:%@", sessionManager.requestSerializer.HTTPRequestHeaders);
+    return shareAFNetworingInstance;
 }
 
-+ (void)ModifyHttpReponseHeader:(AFHTTPSessionManager *)sessionManager type:(FIHttpRequestType)type {
-    if (FIHTTP_REQUEST_TYPE_VISITDOCOTRCARD_GET == type) {
-        //获取网页格式 text/html
-        sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
-        sessionManager.responseSerializer.acceptableContentTypes = [sessionManager.responseSerializer.acceptableContentTypes setByAddingObject:@"text/html"];
-    }
-    
-    NSLog(@"Response响应:%@", sessionManager.responseSerializer.acceptableContentTypes);
+- (NSMutableURLRequest *)requestWithType:(FIHttpRequestType)type params:(NSDictionary *)params
+{
+    //实现FIAFNetworking，修改请求头
+    NSURL *url = [FIURLManager urlWithType:type];
+    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:url];
+    [mutableRequest setHTTPMethod:@"POST"];
+    [mutableRequest setHTTPBody:[self postDataWithParameters:params]];
+
+    return mutableRequest;
+}
+
+- (NSData *)postDataWithParameters:(id)params
+{
+    NSString *jsonString = FIQueryStringFromParametersWithEncoding(params, NSUTF8StringEncoding);
+    return [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (void)ModifyHttpRequestHeader:(AFHTTPSessionManager *)sessionManager type:(FIHttpRequestType)type {
+    //实现FIAFNetworking，修改请求头
+}
+
+- (void)ModifyHttpReponseHeader:(AFHTTPSessionManager *)sessionManager type:(FIHttpRequestType)type {
+    //实现FIAFNetworking，修改请求头
 }
 
 /**
@@ -105,7 +116,7 @@
  *  @param success  请求成功block
  *  @param failure  请求失败block
  */
-+(void)httpGet:(FIHttpRequestType)type
+-(void)httpGet:(FIHttpRequestType)type
         params:(NSDictionary *)params
       progress:(void(^)(id operation))progress
        success:(void(^)(id operation , id responseObject))success
@@ -114,8 +125,21 @@
  
     NSString *afUrl  = [FIURLManager strURLWithType:type];
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
-    [self ModifyHttpRequestHeader:sessionManager];
-    [self ModifyHttpReponseHeader:sessionManager type:type];
+    
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
+        [self.delegate ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpReponseHeader:type:)]) {
+        [self.delegate ModifyHttpReponseHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpReponseHeader:sessionManager type:type];
+    }
+    
     [sessionManager GET:afUrl parameters:params progress:^(NSProgress * _Nonnull downloadProgress) {
         NSLog(@"进度:%@", downloadProgress);
         progress(downloadProgress);
@@ -140,7 +164,7 @@
  *  @param success  请求成功block
  *  @param failure  请求失败block
  */
-+(void)httpPost:(FIHttpRequestType)type
+-(void)httpPost:(FIHttpRequestType)type
          params:(NSDictionary *)params
        progress:(void(^)(id operation))progress
         success:(void(^)(id operation , id responseObject))success
@@ -150,9 +174,19 @@
     // 获取url string 格式的地址；
     NSString *afUrl  = [FIURLManager strURLWithType:type];
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
-    [self ModifyHttpRequestHeader:sessionManager];
-    [self ModifyHttpReponseHeader:sessionManager type:type];
-    [sessionManager POST:afUrl parameters:params progress:^(NSProgress * _Nonnull uploadProgress) {
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
+        [self.delegate ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpReponseHeader:type:)]) {
+        [self.delegate ModifyHttpReponseHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpReponseHeader:sessionManager type:type];
+    }    [sessionManager POST:afUrl parameters:params progress:^(NSProgress * _Nonnull uploadProgress) {
         NSLog(@"进度:%@", uploadProgress);
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSLog(@"返回信息:%@", task.response);
@@ -179,7 +213,7 @@
  *  @param success  请求成功block
  *  @param failure  请求失败block
  */
-+(void)httpPost:(FIHttpRequestType)type
+-(void)httpPost:(FIHttpRequestType)type
          params:(NSDictionary *)params
        filePath:(NSURL*)filepath
      uploadData:(NSData*)data
@@ -194,8 +228,19 @@
     // 获取url string 格式的地址；
     NSString *afUrl  = [FIURLManager strURLWithType:type];
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
-    [self ModifyHttpRequestHeader:sessionManager];
-    [self ModifyHttpReponseHeader:sessionManager type:type];
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpRequestHeader:type:)]) {
+        [self.delegate ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpRequestHeader:sessionManager type:type];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(ModifyHttpReponseHeader:type:)]) {
+        [self.delegate ModifyHttpReponseHeader:sessionManager type:type];
+    }
+    else {
+        [self ModifyHttpReponseHeader:sessionManager type:type];
+    }
     [sessionManager POST:afUrl parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         [formData appendPartWithFileData:data name:name fileName:filename mimeType:mimeType];
         NSLog(@"消息体:%@", formData);
@@ -228,7 +273,7 @@
  *  @param filepath 下载完成后保存的文件路径
  *  @param failure  请求失败block
  */
-+(void)httpDownload:(FIHttpRequestType)type params:(NSDictionary *)params
+-(void)httpDownload:(FIHttpRequestType)type params:(NSDictionary *)params
            savePath:(NSURL*)filepath
            progress:(void (^)(NSProgress *downloadProgress)) progress
            success:(void (^)(id operation, NSURL *filePath , NSString* filename)) success
@@ -237,8 +282,16 @@
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFURLSessionManager *managerDownload = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     
-    NSURLRequest *request = [FIHttpRequestManager requestWithType:type
-                                                           params:params];
+    NSMutableURLRequest *request = nil;
+    if ([self.delegate respondsToSelector:@selector(requestWithType:params:)]) {
+        request = [self.delegate requestWithType:type params:params];
+        [request setHTTPMethod:@"POST"];
+        [request setHTTPBody:[self postDataWithParameters:params]];
+    }
+    else {
+        request = [self requestWithType:type params:params];
+    }
+    
     NSURLSessionDownloadTask *downloadTask = [managerDownload downloadTaskWithRequest:request
                                                                              progress:^(NSProgress *downloadProgress) {
                                                                                  progress(downloadProgress);
@@ -279,7 +332,7 @@
  *  @param success  PASS
  *  @param failure  FAIL
  */
-+(void)httpUpload:(FIHttpRequestType)type
+-(void)httpUpload:(FIHttpRequestType)type
            params:(NSDictionary *)params
          filePath:(NSURL*)filepath
          progress:(void (^)(NSProgress *progress)) progress
@@ -290,8 +343,16 @@
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     
-    NSURLRequest *request = [FIHttpRequestManager requestWithType:type
-                                                           params:params];
+    NSMutableURLRequest *request = nil;
+    if ([self.delegate respondsToSelector:@selector(requestWithType:params:)]) {
+        request = [self.delegate requestWithType:type params:params];
+        [request setHTTPMethod:@"POST"];
+        [request setHTTPBody:[self postDataWithParameters:params]];
+    }
+    else {
+        request = [self requestWithType:type params:params];
+    }
+
     NSURLSessionUploadTask *uploadTask = [manager uploadTaskWithRequest:request
                                                                fromFile:filepath
                                                                progress:^(NSProgress *uploadProgress) {
@@ -324,7 +385,7 @@
  *  @param success  PASS
  *  @param failure  FAIL
  */
-+(void)httpUploadByMultiPart:(FIHttpRequestType)type
+-(void)httpUploadByMultiPart:(FIHttpRequestType)type
                       params:(NSDictionary*)params
                     fileURL:(NSURL*)fileurl
                     fileType:(NSString*)filetype
