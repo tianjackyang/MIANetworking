@@ -113,17 +113,6 @@
 {
  
     NSString *afUrl  = [FIURLManager strURLWithType:type];
-    if (IsNilOrNull(afUrl)) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            slm_alert(@"url地址为空！");
-        });
-    }
-    
-    
-    if (IsNilOrNull(afUrl)) {
-        return;
-    }
-    
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     [self ModifyHttpRequestHeader:sessionManager];
     [self ModifyHttpReponseHeader:sessionManager type:type];
@@ -133,20 +122,9 @@
         
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSLog(@"返回信息:%@", task.response);
-        if (FIHTTP_REQUEST_TYPE_VISITDOCOTRCARD_GET == type) {
-            NSString *result = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
-            NSLog(@"返回html:%@",result);
-        }
-        else {
-            NSLog(@"成功:%@",responseObject);
-        }
-        success(task, responseObject);
+        NSLog(@"成功:%@",responseObject);
         
-        if ([responseObject[@"errcode"] longValue] == 4011) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[FIAppDelegate shareAppDelegate] switchToLoginViewController];
-            });
-        }
+        success(task, responseObject);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         NSLog(@"失败:%@", error);
         failure(task, error);
@@ -171,16 +149,6 @@
 
     // 获取url string 格式的地址；
     NSString *afUrl  = [FIURLManager strURLWithType:type];
-    if (IsNilOrNull(afUrl)) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            slm_alert(@"url地址为空！");
-        });
-    }
-    
-    if (IsNilOrNull(afUrl)) {
-        return;
-    }
-    
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     [self ModifyHttpRequestHeader:sessionManager];
     [self ModifyHttpReponseHeader:sessionManager type:type];
@@ -190,12 +158,6 @@
         NSLog(@"返回信息:%@", task.response);
         NSLog(@"成功:%@",responseObject);
         success(task, responseObject);
-        
-        if ([responseObject[@"errcode"] longValue] == 4011) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[FIAppDelegate shareAppDelegate] switchToLoginViewController];
-            });
-        }
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         NSLog(@"失败:%@", error);
         failure(task, error);
@@ -231,16 +193,6 @@
 {
     // 获取url string 格式的地址；
     NSString *afUrl  = [FIURLManager strURLWithType:type];
-    if (IsNilOrNull(afUrl)) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            slm_alert(@"url地址为空！");
-        });
-    }
-    
-    if (IsNilOrNull(afUrl)) {
-        return;
-    }
-    
     AFHTTPSessionManager *sessionManager = [AFHTTPSessionManager manager];
     [self ModifyHttpRequestHeader:sessionManager];
     [self ModifyHttpReponseHeader:sessionManager type:type];

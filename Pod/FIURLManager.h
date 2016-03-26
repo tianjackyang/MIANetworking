@@ -4,7 +4,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FIDataContext.h"
 
 @interface FIURLManager : NSObject
 + (NSString *)strURLWithType:(FIHttpRequestType)type;

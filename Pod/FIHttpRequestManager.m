@@ -26,9 +26,9 @@ static FIHttpRequestManager *defaultManager = nil;
     [mutableRequest setValue:@"PHONE" forHTTPHeaderField:@"DEVICE_TYPE"];
     [mutableRequest setValue:@"iOS" forHTTPHeaderField:@"OS"];
     [mutableRequest setValue:[[UIDevice currentDevice] systemVersion] forHTTPHeaderField:@"OS_VERSION"];
-    [mutableRequest setValue:[[FIDataContext shareDataContext] appId] forHTTPHeaderField:@"APP_ID"];
-    [mutableRequest setValue:[[FIDataContext shareDataContext] accessToken] forHTTPHeaderField:@"ACCESSTOKEN"];
-    [mutableRequest setValue:FIAPPVersion forHTTPHeaderField:@"APP_VERSION"];
+    [mutableRequest setValue:@"APPID"forHTTPHeaderField:@"APP_ID"];
+    [mutableRequest setValue:@"ACCESSTOKEN" forHTTPHeaderField:@"ACCESSTOKEN"];
+    [mutableRequest setValue:@"FIAPPVersion" forHTTPHeaderField:@"APP_VERSION"];
     [mutableRequest setValue:stringName forHTTPHeaderField:@"DEVICE_NAME"];
     
     return mutableRequest;

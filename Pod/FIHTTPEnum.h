@@ -10,9 +10,9 @@
 /**
  *  bundle id, appid(98,99,1), appver(3.0.1)
  */
-#define FIBundleID      [[NSBundle mainBundle] bundleIdentifier]
-#define FIAppID         [FIDataContext shareDataContext].appId
-#define FIAPPVersion    [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]
+//#define FIBundleID      [[NSBundle mainBundle] bundleIdentifier]
+//#define FIAppID         [FIDataContext shareDataContext].appId
+//#define FIAPPVersion    [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]
 
 typedef NS_ENUM(NSInteger, FIHttpRequestType) {
     FIHTTP_REQUEST_TYPE_ALLAPI_GET = 0,//所有API
