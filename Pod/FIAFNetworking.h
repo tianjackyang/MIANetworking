@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FIHTTPEnum.h"
 
 @protocol FIAFNetworking <NSObject>
 //修改请求头

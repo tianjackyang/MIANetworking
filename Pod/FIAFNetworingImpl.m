@@ -7,7 +7,6 @@
 //
 
 #import "FIAFNetworingImpl.h"
-#import "FIAFNetworking.h"
 
 @implementation FIAFNetworingImpl
 - (NSMutableURLRequest *)requestWithType:(FIHttpRequestType)type params:(NSDictionary *)params

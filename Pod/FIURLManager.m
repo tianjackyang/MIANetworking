@@ -5,6 +5,7 @@
 
 #import "FIURLManager.h"
 
+
 @implementation FIURLManager
 
 + (NSURL *)urlWithType:(FIHttpRequestType)type

@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@protocol  FIAFNetworking;
+#import "FIAFNetworking.h"
 
 @interface FIAFNetworingImpl : NSObject <FIAFNetworking>
 
