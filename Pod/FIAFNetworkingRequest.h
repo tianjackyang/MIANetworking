@@ -2,12 +2,8 @@
 //  FIAFNetworkingRequest.h
 //  FICorpUMSApp
 //
-
-
-#import "AFNetworking.h"
-#import "FIURLManager.h"
 #import <Foundation/Foundation.h>
-#import "FIAFNetworking.h"
+#import "FIAFNetworingImpl.h"
 
 @interface FIAFNetworkingRequest : NSObject
 

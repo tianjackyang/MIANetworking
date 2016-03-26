@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "FIAFNetworking.h"
+#import "FIURLManager.h"
 
 @interface FIAFNetworingImpl : NSObject <FIAFNetworking>
 

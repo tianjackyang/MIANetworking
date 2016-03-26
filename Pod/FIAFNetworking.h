@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "AFNetworking.h"
 #import "FIHTTPEnum.h"
 
 @protocol FIAFNetworking <NSObject>

@@ -61,7 +61,6 @@
 
 #import "FIAFNetworkingRequest.h"
 #import "FIQueryStringPair.h"
-#import "FIAFNetworingImpl.h"
 
 static FIAFNetworkingRequest *shareAFNetworingInstance = nil;
 
